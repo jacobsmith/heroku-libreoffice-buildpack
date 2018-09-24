@@ -1,0 +1,39 @@
+BUILD_DIR="$1"
+CACHE_DIR="$2"
+ENV_DIR="$3"
+LIBRE_OFFICE_FILENAME="LibreOffice_6.1.1.2_Linux_x86-64_deb"
+
+# Constants
+OPEN_OFFICE_MD5='df759347279a1a00d5f8901c5d9de7a6'
+
+
+## Body of Script
+cd $CACHE_DIR
+
+# download the OpenOffice file
+curl -o open_office_deb.tar.gz https://ftp.wayne.edu/tdf/libreoffice/stable/6.1.1/deb/x86_64/LibreOffice_6.1.1_Linux_x86-64_deb.tar.gz
+
+# get md5 of just-downloaded file
+CALCULATED_MD5=$(md5sum open_office_deb.tar.gz | cut -f 1 -d " ")
+
+if [ "$CALCULATED_MD5" != "$OPEN_OFFICE_MD5" ]; then
+  echo "MD5 Mismatch!"
+  echo "Calculated: $CALCULATED_MD5"
+  echo "Expected:   $OPEN_OFFICE_MD5"
+  exit 1
+fi
+
+# unzip the file
+tar -xvzf open_office_deb.tar.gz -C .
+
+# remove the compressed archive
+rm open_office_deb.tar.gz
+
+cd "${LIBRE_OFFICE_FILENAME}/DEBS"
+
+dpkg -i *.deb
+
+# install any missing dependencies
+apt-get install -f
+
+echo The installed version of LibreOffice is: $(/opt/libreoffice6.1/program/soffice --version)
