@@ -4,3 +4,4 @@ libxinerama1
 libxdamage1
 libglu1-mesa:i386
 libcairo2
+libsm6
