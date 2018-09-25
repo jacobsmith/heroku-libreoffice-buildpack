@@ -1,0 +1,7 @@
+# Buildpacks
+
+These will need to be added manually but should be on the dyno in this order
+
+1. https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku-community/apt.tgz
+2. heroku/java
+3. https://github.com/OpenOlitor/heroku-buildpack-libreoffice
