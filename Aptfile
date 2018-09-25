@@ -6,3 +6,4 @@ libglu1-mesa:i386
 libcairo2
 libsm6
 libice6
+libpixman-1-0
