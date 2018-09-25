@@ -31,9 +31,6 @@ rm open_office_deb.tar.gz
 
 cd "${LIBRE_OFFICE_FILENAME}/DEBS"
 
-sudo dpkg -i *.deb
-
-# install any missing dependencies
-sudo apt-get install -f
+dpkg -i *.deb
 
 echo The installed version of LibreOffice is: $(/opt/libreoffice6.1/program/soffice --version)
