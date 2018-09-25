@@ -31,6 +31,9 @@ rm open_office_deb.tar.gz
 
 cd "${LIBRE_OFFICE_FILENAME}/DEBS"
 
+# make sure apt can run
+mkdir -p /var/cache/apt/archives/partial
+
 dpkg -i *.deb
 
 # install any missing dependencies
