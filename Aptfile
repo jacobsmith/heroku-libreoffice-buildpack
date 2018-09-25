@@ -8,3 +8,4 @@ libsm6
 libice6
 libpixman-1-0
 libxcb-render0
+libxrender1
