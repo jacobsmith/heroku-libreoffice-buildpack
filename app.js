@@ -1,24 +1,66 @@
 var fs = require('fs');
+const spawn = require('child_process');
 
-var wordDocBuffer = fs.readFileSync('./test.docx');
+const convertBufferToHTML = (buffer) => {
+  return new Promise(function(resolve, reject) {
+    try {
+      const randomJitter  = Math.floor(Math.random() * 1E16);
+      const tempFilePath  = '/tmp/';
+      const tempFileName  = '' + Date.now() + '-' + randomJitter; // avoid collisions
+      const inputFile     = tempFilePath + tempFileName;
+      const htmlOutputDir = '/tmp/output';
 
-// write "buffer" to temp file just to get that same flow
-//
-const tempFileName = '/tmp/testdoc' // will need to be a uuid, etc.
-fs.writeSync(tempFileName, wordDocBuffer);
+      // write buffer to temp file system
+      fs.writeFileSync(inputFile, buffer);
 
-const command = 'soffice --norestore --nolockcheck --headless --convert-to html:HTML:EmbedImages --outdir /tmp/output.html ' + tempFileName;
+      // libreoffice command
+      // don't restore in the event libreoffice crashed
+      // don't check that other things are remotely connected
+      // run headless (no X11) mode
+      // convert to HTML
+      // output the file to a particular directory
+      // pass the input file to actually convert
+      const command = 'soffice \
+      --norestore \
+      --nolockcheck \
+      --headless \
+      --convert-to html:HTML:EmbedImages \
+      --outdir ' + htmlOutputDir + ' '
+      + inputFile
 
-const conversionProcess = spawn.exec(cmd, function (err, stdout, stderr) {
-  if (err) {
-    console.log('ERROR: ', err);
-    resolve(err);
-    return;
+      const conversionProcess = spawn.exec(command, function (err, stdout, stderr) {
+        if (err) {
+          console.log('ERROR: ', err);
+          reject(err);
+        }
+      });
+
+      conversionProcess.on('exit', (code, signal) => {
+        if (code === 0) {
+          // success
+
+          const generatedHtmlFileName =  '/tmp/output/' + tempFileName + '.html'
+          const htmlBuffer = fs.readFileSync(generatedHtmlFileName);
+
+          // remove old files
+          fs.unlinkSync(generatedHtmlFileName);
+          fs.unlinkSync(inputFile);
+
+          // return the generated HTML
+          resolve(htmlBuffer);
+        } else {
+          console.log('Error: ', code, signal);
+          reject(signal);
+        }
+      });
+    });
+  } catch (err) {
+    console.log('Error: ', err);
+    reject(err);
   }
-  console.log(['stdout:', stdout, 'stderr:', stderr]);
-});
+}
 
-conversionProcess.on('exit', (code, signal) => {
-  console.log('Child Process Exit - Code: ', code, ' Signal: ', signal);
-  console.log('see the output at ', tempFileName);
+fs.readFile('./test.doc', async function(err, buf) {
+  const html = await convertBufferToHTML(buf);
+  console.log('output: ', html.toString());
 });
